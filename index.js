@@ -13,6 +13,10 @@ mongoose.connect(mongoUrl);
 
 
 
+
+
+
+
 ///////////////////
 // DAO
 var EntrySchema = new mongoose.Schema({
@@ -23,6 +27,10 @@ var EntrySchema = new mongoose.Schema({
 });
 mongoose.model('Entry', EntrySchema);
 var Entry = mongoose.model('Entry');
+
+
+
+
 
 
 
@@ -38,16 +46,19 @@ app.get('/', function (req, res) {
 		if (!error && response.statusCode == 200) {
 			$ = cheerio.load(body);
 
-			var html = '';
 			var prices = $('span.display-price').each(function(index) {
 				if($(this).text() === 'Free') {
-					html += $(this).parents('.card').html();
-					// console.log($(this).parents('.details').html());
+					var $card = $(this).parents('.card');
+					var $album = $card.find('a.title');
+					var albumLink = 'play.google.com' + $album.attr('href');
+					var albumTitle = $album.text().trim();
+					var artist = $card.find('a.subtitle').text().trim();
+					var imgUrl = $card.find('img.cover-image').attr('src');
 
 					var entry = new Entry({
-						title: "This is a test",
-						url: "This is a test",
-						pictureUrl: "This is a test",
+						title: albumTitle + ' by ' + artist,
+						url: albumLink,
+						pictureUrl: imgUrl,
 						dateDiscovered: new Date()
 					});
 
@@ -55,13 +66,13 @@ app.get('/', function (req, res) {
 						if (err) {
 							return console.error(err);
 						} else {
-							console.dir(entry);
+							console.dir("Successfully committed new entry to DB: " + entry);
 						}
 					});
 				}
 			});
 
-			res.send(html) // Show the HTML for the Google homepage.
+			res.send("Finished!") // Show the HTML for the Google homepage.
 		}
 	})
 });
@@ -71,6 +82,8 @@ app.get('/', function (req, res) {
 
 
  
+///////////////////
+// RUN SERVER
 app.listen(serverPort, serverIP, function () {
 	console.log( "Listening on " + serverIP + ", port " + serverPort )
 });
