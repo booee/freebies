@@ -52,11 +52,9 @@ app.get('/', function (req, res) {
 });
 
 // TODO: timer-based execution
-// TODO: get for RSS
-	// TODO: get for play music under /rss/googleplaymusic-freealbumoftheweek
-	// TODO: more providers/services offering similar deals? 
-		// Perhaps amazon's free app of the day (FAOTD)
-// TODO: restful get returns JSON blob
+// TODO: get for RSS, returns RSS xml of last 20 entries
+	// get for play music under /rss/googleplaymusic-freealbumoftheweek - will query based on platform === PLATFORM_GOOGLE_PLAY_MUSIC
+// TODO: restful get returns JSON blob of active entries
 
 
 
