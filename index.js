@@ -51,8 +51,23 @@ app.get('/', function (req, res) {
 	})
 });
 
-// TODO: get for RSS, returns RSS xml of last 20 entries
-	// get for play music under /rss/googleplaymusic-freealbumoftheweek - will query based on platform === PLATFORM_GOOGLE_PLAY_MUSIC
+app.get('/rss', function (req, res) {
+	console.log('Rendering RSS feed');
+	res.set('Content-Type', 'text/xml');
+	getRssFeed('rss-2.0', function(rssXml) {
+		console.log(rssXml);
+		res.send(rssXml);
+	});
+});
+
+app.get('/atom', function (req, res) {
+	console.log('Rendering Atom feed');
+	res.set('Content-Type', 'text/xml');
+	getRssFeed('atom-1.0', function(atomXml) {
+		res.send(atomXml);
+	});
+});
+
 // TODO: restful get returns JSON blob of active entries
 
 
@@ -158,6 +173,41 @@ function updateEntries(callback) {
 	});
 }
 
+
+
+var Feed = require('feed');
+
+function getRssFeed(renderType, callback) {
+	var feed = new Feed({
+	    title:          'Free album of the week (Google Play Edition)',
+	    description:    'Subscribe to this, and you\'ll never miss the free music again',
+	    link:           'http://yakshaving.io',
+
+	    author: {
+	        name:       'Yak Shaver 9000 '
+	    }
+	});
+
+	Entry.find({'status': STATUS_ACTIVE}).exec(function(err, result) {
+		if(!err) {
+			for(var i = 0, len = result.length; i < len; i++) {
+				var entry = result[i];
+
+				feed.addItem({
+					title: entry.title,
+					link: entry.url,
+					description: entry.title + " by " + entry.by,
+					date: entry.dateDiscovered
+				});
+			}
+		} else {
+			console.error('Error while retrieving active entries for feed: ' + err);
+
+		}
+
+		callback(feed.render(renderType));
+	});
+}
 
 
 
