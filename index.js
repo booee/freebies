@@ -51,7 +51,6 @@ app.get('/', function (req, res) {
 	})
 });
 
-// TODO: timer-based execution
 // TODO: get for RSS, returns RSS xml of last 20 entries
 	// get for play music under /rss/googleplaymusic-freealbumoftheweek - will query based on platform === PLATFORM_GOOGLE_PLAY_MUSIC
 // TODO: restful get returns JSON blob of active entries
@@ -166,6 +165,26 @@ function updateEntries(callback) {
  
 ///////////////////
 // RUN SERVER
+
+// expose data via express
 app.listen(serverPort, serverIP, function () {
 	console.log( "Listening on " + serverIP + ", port " + serverPort )
 });
+
+
+// execute on cronjob
+var schedule = require('node-schedule'); // https://github.com/mattpat/node-schedule
+var cronExpression = '0 */6 * * *'; // every 6 hours, https://github.com/harrisiirak/cron-parser
+var cronCallback = function() {
+	console.log("Executing cronjob");
+	updateEntries(function() {
+		console.log("Executed timer-based update!");
+	});
+}
+console.log("Building cronjob using expression: " + cronExpression);	
+schedule.scheduleJob(cronExpression, cronCallback);
+
+
+// execute on startup!
+console.log("Executing on startup");
+updateEntries(function(){ console.log("executed on startup!"); });
