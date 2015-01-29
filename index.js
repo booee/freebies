@@ -95,7 +95,7 @@ function updateEntries(callback) {
 				if($(this).text() === 'Free') {
 					var $card = $(this).parents('.card');
 					var $album = $card.find('a.title');
-					var albumLink = 'play.google.com' + $album.attr('href');
+					var albumLink = 'http://play.google.com' + $album.attr('href');
 					var albumTitle = $album.text().trim();
 					var artist = $card.find('a.subtitle').text().trim();
 					var imgUrl = $card.find('img.cover-image').attr('src');
@@ -181,20 +181,21 @@ function getRssFeed(renderType, callback) {
 	var feed = new Feed({
 	    title:          'Free album of the week (Google Play Edition)',
 	    description:    'Subscribe to this, and you\'ll never miss the free music again',
-	    link:           '',
+	    link:           'yakshaving.io',
 
 	    author: {
 	        name:       'Yak Shaver 9000 '
 	    }
 	});
 
-	Entry.find({'status': STATUS_ACTIVE}).exec(function(err, result) {
+	Entry.find({'status': STATUS_ACTIVE}).sort({dateDiscovered: -1}).limit(20).exec(function(err, result) {
 		if(!err) {
 			for(var i = 0, len = result.length; i < len; i++) {
 				var entry = result[i];
 
 				feed.addItem({
 					title: entry.title,
+					image: entry.pictureUrl,
 					link: entry.url,
 					description: entry.title + " by " + entry.by,
 					date: entry.dateDiscovered
