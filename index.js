@@ -181,7 +181,7 @@ function getRssFeed(renderType, callback) {
 	var feed = new Feed({
 	    title:          'Free album of the week (Google Play Edition)',
 	    description:    'Subscribe to this, and you\'ll never miss the free music again',
-	    link:           'yakshaving.io',
+	    link:           'http://yakshaving.io',
 
 	    author: {
 	        name:       'Yak Shaver 9000 '
