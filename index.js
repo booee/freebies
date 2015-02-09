@@ -204,11 +204,11 @@ function getRssFeed(renderType, callback) {
 
 				feed.addItem({
 					title: entry.title,
-					image: entry.pictureUrl,
+					// image: entry.pictureUrl,
 					link: entry.url,
 					description: entry.title + " by " + entry.by,
 					date: entry.dateDiscovered,
-					content: 'Obtain "' + entry.title + '"" by ' + entry.by + ' for FREE via ' + entry.url
+					content: 'Obtain "' + entry.title + '" by ' + entry.by + ' for FREE via ' + entry.url
 				});
 			}
 		} else {
