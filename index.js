@@ -78,6 +78,7 @@ app.get('/atom', function (req, res) {
 // BIZ LOGIC
 var request = require('request');
 var cheerio = require('cheerio');
+var fs = require('fs');
 
 function updateEntries(callback) {
 	var url = 'https://play.google.com/store/music';
@@ -98,7 +99,11 @@ function updateEntries(callback) {
 					var albumLink = 'http://play.google.com' + $album.attr('href');
 					var albumTitle = $album.text().trim();
 					var artist = $card.find('a.subtitle').text().trim();
-					var imgUrl = $card.find('img.cover-image').attr('src');
+
+					var albumArtUrl = $card.find('img.cover-image').attr('src');
+					var albumArtFileName = artist + '-' + albumTitle + '.jpg';
+					request(albumArtUrl).pipe(fs.createWriteStream('./public/img/' + albumArtFileName));
+					var imgUrl = 'http://faotw.yakshaving.io/img/' + albumArtFileName;
 
 					var parsedEntry = new Entry({
 						platform: PLATFORM_GOOGLE_PLAY_MUSIC,
@@ -171,6 +176,10 @@ function updateEntries(callback) {
 
 		callback();
 	});
+}
+
+
+function saveAlbumArt(url, filename) {
 }
 
 
