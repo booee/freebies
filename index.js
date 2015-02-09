@@ -198,15 +198,15 @@ function getRssFeed(renderType, callback) {
 					image: entry.pictureUrl,
 					link: entry.url,
 					description: entry.title + " by " + entry.by,
-					date: entry.dateDiscovered
+					date: entry.dateDiscovered,
+					content: 'Obtain "' + entry.title + '"" by ' + entry.by + ' for FREE via ' + entry.url
 				});
 			}
 		} else {
 			console.error('Error while retrieving active entries for feed: ' + err);
-
 		}
 
-		callback(feed.render(renderType));
+		callback(feed.render(renderType).trim());
 	});
 }
 
