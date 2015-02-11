@@ -179,10 +179,6 @@ function updateEntries(callback) {
 }
 
 
-function saveAlbumArt(url, filename) {
-}
-
-
 
 var Feed = require('feed');
 
