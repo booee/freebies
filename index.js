@@ -83,7 +83,8 @@ function updateEntries(callback) {
 		var preExistingEntriesToUpdate = [];
 		Entry.find({'status': STATUS_ACTIVE}).exec(function(err, results) {
 			if(!err) {
-				compareToExistingEntries(results, newlyParsedEntries, saveAllAlbums);
+				compareToExistingEntries(results, newlyParsedEntries);
+				saveAllAlbums(newlyParsedEntries);
 				
 			} else {
 				console.error('Error while retrieving pre-existing active entries: ' + err);
@@ -98,19 +99,14 @@ function compareToExistingEntries(existingEntries, newlyFoundEntries, callback) 
 	for(var i = 0, len = existingEntries.length; i < len; i++) {
 		var existing = existingEntries[i];
 		var index = newlyFoundEntries.urls.indexOf(existing.url);
-
-		console.log(newlyFoundEntries);
 		if(index >= 0) {
 			console.warn('Pruning newly parsed entry because it already exists in the db: ' + newlyFoundEntries[index].title);
 			newlyFoundEntries.splice(index, 1);
 			newlyFoundEntries.urls.splice(index, 1);
-			// console.log(newlyFoundEntries);
 		} else {
 			updateAlbumAsInactive(existing);
 		}
 	}
-
-	callback(newlyFoundEntries);
 }
 
 function updateAlbumAsInactive(entry) {
@@ -153,7 +149,7 @@ var Feed = require('feed');
 
 function getRssFeed(renderType, callback) {
 	var feed = new Feed({
-	    title:          'Free album of the week (Google Play Edition)',
+	    title:          'Free Album of the Week (Google Play Music)',
 	    description:    'Subscribe to this, and you\'ll never miss the free music again',
 	    link:           'http://yakshaving.io',
 
@@ -169,7 +165,6 @@ function getRssFeed(renderType, callback) {
 
 				feed.addItem({
 					title: entry.title,
-					// image: entry.pictureUrl,
 					link: entry.url,
 					description: entry.title + " by " + entry.by,
 					date: entry.dateDiscovered,
