@@ -165,11 +165,11 @@ function getRssFeed(renderType, callback) {
 				var entry = result[i];
 
 				feed.addItem({
-					title: entry.title,
+					title: entry.title + " - " + entry.by,
 					link: entry.url,
-					description: entry.title + " by " + entry.by,
+					description: entry.title + " - " + entry.by,
 					date: entry.dateDiscovered,
-					content: 'Obtain "' + entry.title + '" by ' + entry.by + ' for FREE via ' + entry.url
+					content: 'Free on Google Play Music'
 				});
 			}
 		} else {
