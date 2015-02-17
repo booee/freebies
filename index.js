@@ -76,106 +76,75 @@ app.get('/atom', function (req, res) {
 
 ///////////////////
 // BIZ LOGIC
-var request = require('request');
-var cheerio = require('cheerio');
-var fs = require('fs');
+var Crawler = require('./lib/GooglePlayMusicCrawler');
 
 function updateEntries(callback) {
-	var url = 'https://play.google.com/store/music';
-
-	// TODO: leverage async library for cleaner code
-	// TODO: split out google-specific logic into a single parser and compose
-	request(url, function (error, response, body) {
-		var newlyParsedEntries = [];
-		newlyParsedEntries.urls = [];
-
-		if (!error && response.statusCode == 200) {
-			$ = cheerio.load(body);
-
-			var prices = $('span.display-price').each(function(index) {
-				if($(this).text() === 'Free') {
-					var $card = $(this).parents('.card');
-					var $album = $card.find('a.title');
-					var albumLink = 'http://play.google.com' + $album.attr('href');
-					var albumTitle = $album.text().trim();
-					var artist = $card.find('a.subtitle').text().trim();
-
-					var albumArtUrl = $card.find('img.cover-image').attr('src');
-					var albumArtFileName = artist + '-' + albumTitle + '.jpg';
-					request(albumArtUrl).pipe(fs.createWriteStream('./public/img/' + albumArtFileName));
-					var imgUrl = 'http://faotw.yakshaving.io/img/' + albumArtFileName;
-
-					var parsedEntry = new Entry({
-						platform: PLATFORM_GOOGLE_PLAY_MUSIC,
-						title: albumTitle,
-						by: artist,
-						url: albumLink,
-						pictureUrl: imgUrl,
-						dateDiscovered: new Date(),
-						status: STATUS_ACTIVE
-					});
-
-					if(newlyParsedEntries.urls.indexOf(parsedEntry.url) < 0) {
-						console.log('parsed entry: ' + parsedEntry.title);
-						newlyParsedEntries.urls.push(parsedEntry.url);
-						newlyParsedEntries.push(parsedEntry);
-					} else {
-						console.warn('Ignoring duplicate entry encountered while parsing: ' + parsedEntry.title);
-					}
-				}
-			});
-		}
-
-		// Prune duplicates, save newly parsed, and deactivate invalid existing entries
+	var crawlCallback = function(newlyParsedEntries) {
 		var preExistingEntriesToUpdate = [];
-		Entry.find({'status': STATUS_ACTIVE}).exec(function(err, result) {
+		Entry.find({'status': STATUS_ACTIVE}).exec(function(err, results) {
 			if(!err) {
-
-				console.log('active entry query returned ' + result.length + ' results');
-				if(result.length) {
-					for(var existingIndex = 0, existingLength = result.length; existingIndex < existingLength; existingIndex++) {
-						var existing = result[existingIndex];
-						var newlyParsedEntryIndex = newlyParsedEntries.urls.indexOf(existing.url);
-						if(newlyParsedEntryIndex >= 0) {
-							console.warn('Pruning newly parsed entry - already in database: ' + existing.title);
-							newlyParsedEntries.splice(newlyParsedEntryIndex, 1);
-						} else {
-							console.log('Moving ' + existing.title + ' to inactive');
-							existing.status = STATUS_INACTIVE;
-							preExistingEntriesToUpdate.push(existing);
-						}
-					}
-				} else {
-					console.log('Attempted to prune newly parsed entries against pre-existing active ones, but there were no active entries to compare with!');
-				}
-
-				// Write changes to db. Don't care about being transactional here as every run will be somewhat idempotent
-				var entriesToDb = newlyParsedEntries.concat(preExistingEntriesToUpdate);
-				console.log('Committing ' + entriesToDb.length + ' change(s) to the database');
-				if(entriesToDb.length) {
-					for(var entryIndex = 0, entriesToDbLength = entriesToDb.length; entryIndex < entriesToDbLength; entryIndex++) {
-						var entryToDb = entriesToDb[entryIndex].save(function(err, entry) {
-							if (err) {
-								return console.error('Error committing entry to DB: ' + err);
-							} else {
-								if(entry.status === STATUS_ACTIVE) {
-									console.log("Successfully committed new entry to DB: " + entry.title);
-								} else {
-									console.log("Updating entry to be inactive: " + entry.title);
-								}
-							}
-						});
-					}
-				}
+				compareToExistingEntries(results, newlyParsedEntries, saveAllAlbums);
+				
 			} else {
 				console.error('Error while retrieving pre-existing active entries: ' + err);
 			}
 		});
+	}
 
-		
+	new Crawler().getFreeAlbums(crawlCallback);
+}
 
-		callback();
+function compareToExistingEntries(existingEntries, newlyFoundEntries, callback) {
+	for(var i = 0, len = existingEntries.length; i < len; i++) {
+		var existing = existingEntries[i];
+		var index = newlyFoundEntries.urls.indexOf(existing.url);
+
+		console.log(newlyFoundEntries);
+		if(index >= 0) {
+			console.warn('Pruning newly parsed entry because it already exists in the db: ' + newlyFoundEntries[index].title);
+			newlyFoundEntries.splice(index, 1);
+			newlyFoundEntries.urls.splice(index, 1);
+			// console.log(newlyFoundEntries);
+		} else {
+			updateAlbumAsInactive(existing);
+		}
+	}
+
+	callback(newlyFoundEntries);
+}
+
+function updateAlbumAsInactive(entry) {
+	console.log('Moving ' + entry.title + ' to inactive');
+	entry.status = STATUS_INACTIVE;
+	entry.save(function(err, entry) {
+		if(err) {
+			console.error('Error setting entry as inactive', err);
+		} else {
+			console.log("Successfully updated entry as inactive");
+		}
 	});
+}
+
+function saveAllAlbums(albums) {
+	for(var i = 0, len = albums.length; i < len; i++) {
+		var album = albums[i];
+		var entry = new Entry({
+			platform: PLATFORM_GOOGLE_PLAY_MUSIC,
+			title: album.title,
+			by: album.artist,
+			url: album.url,
+			dateDiscovered: new Date(),
+			status: STATUS_ACTIVE
+		});
+
+		entry.save(function(err, entry) {
+			if (err) {
+				console.error('Error committing entry to DB', err);
+			} else {
+				console.log("Successfully committed new entry to DB: " + entry.title);
+			}
+		});
+	}
 }
 
 
