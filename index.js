@@ -195,7 +195,7 @@ app.listen(serverPort, serverIP, function () {
 
 // execute on cronjob
 var schedule = require('node-schedule'); // https://github.com/mattpat/node-schedule
-var cronExpression = '0 */6 * * *'; // every 6 hours, https://github.com/harrisiirak/cron-parser
+var cronExpression = '0/15 * * * *'; // every 15 min, https://github.com/harrisiirak/cron-parser
 var cronCallback = function() {
 	console.log("Executing cronjob");
 	updateEntries(function() {
