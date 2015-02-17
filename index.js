@@ -55,7 +55,6 @@ app.get('/rss', function (req, res) {
 	console.log('Rendering RSS feed');
 	res.set('Content-Type', 'text/xml');
 	getRssFeed('rss-2.0', function(rssXml) {
-		console.log(rssXml);
 		res.send(rssXml);
 	});
 });
@@ -90,6 +89,8 @@ function updateEntries(callback) {
 				console.error('Error while retrieving pre-existing active entries: ' + err);
 			}
 		});
+
+		callback();
 	}
 
 	new Crawler().getFreeAlbums(crawlCallback);
