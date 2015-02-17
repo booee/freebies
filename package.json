@@ -10,7 +10,6 @@
   "author": "Brad Bowie",
   "license": "ISC",
   "dependencies": {
-    "cheerio": "^0.18.0",
     "ejs": "^2.2.1",
     "express": "^4.11.0",
     "mongoose": "^3.8.21",
