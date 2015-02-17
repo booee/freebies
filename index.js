@@ -167,9 +167,9 @@ function getRssFeed(renderType, callback) {
 				feed.addItem({
 					title: entry.title + " - " + entry.by,
 					link: entry.url,
-					description: entry.title + " - " + entry.by,
+					description: 'Free on Google Play Music',
 					date: entry.dateDiscovered,
-					content: 'Free on Google Play Music'
+					content: 'Follow link to purchase'
 				});
 			}
 		} else {
