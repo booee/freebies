@@ -46,9 +46,24 @@ var Entry = mongoose.model('Entry');
 ///////////////////
 // CONTROLLER
 app.get('/', function (req, res) {
+
+		Entry.find().sort({dateDiscovered: -1}).limit(20).exec(function(err, result) {
+			var dataForPage = {};
+
+			if(!err) {
+				dataForPage.entries = result;
+			} else {
+				console.error('Error while retrieving active entries for feed: ' + err);
+			}
+
+			res.render('index', dataForPage);
+		});
+});
+
+app.get('/forceRefresh', function (req, res) {
 	updateEntries(function() {
-		res.send('all done!');
-	})
+		res.send('refreshed!');
+	});
 });
 
 app.get('/rss', function (req, res) {
@@ -78,13 +93,14 @@ app.get('/atom', function (req, res) {
 var Crawler = require('./lib/GooglePlayMusicCrawler');
 
 function updateEntries(callback) {
+	console.log('Checking for any updates');
 	var crawlCallback = function(newlyParsedEntries) {
 		var preExistingEntriesToUpdate = [];
 		Entry.find({'status': STATUS_ACTIVE}).exec(function(err, results) {
 			if(!err) {
 				compareToExistingEntries(results, newlyParsedEntries);
 				saveAllAlbums(newlyParsedEntries);
-				
+
 			} else {
 				console.error('Error while retrieving pre-existing active entries: ' + err);
 			}
@@ -183,7 +199,7 @@ function getRssFeed(renderType, callback) {
 
 
 
- 
+
 ///////////////////
 // RUN SERVER
 
@@ -202,10 +218,10 @@ var cronCallback = function() {
 		console.log("Executed timer-based update!");
 	});
 }
-console.log("Building cronjob using expression: " + cronExpression);	
+console.log("Building cronjob using expression: " + cronExpression);
 schedule.scheduleJob(cronExpression, cronCallback);
 
 
 // execute on startup!
 console.log("Executing on startup");
-updateEntries(function(){ console.log("executed on startup!"); });
+updateEntries(function(){ console.log("Finished startup execution"); });
