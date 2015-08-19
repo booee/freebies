@@ -84,7 +84,7 @@ function updateEntries(callback) {
 			if(!err) {
 				compareToExistingEntries(results, newlyParsedEntries);
 				saveAllAlbums(newlyParsedEntries);
-				
+
 			} else {
 				console.error('Error while retrieving pre-existing active entries: ' + err);
 			}
@@ -183,7 +183,7 @@ function getRssFeed(renderType, callback) {
 
 
 
- 
+
 ///////////////////
 // RUN SERVER
 
@@ -202,7 +202,7 @@ var cronCallback = function() {
 		console.log("Executed timer-based update!");
 	});
 }
-console.log("Building cronjob using expression: " + cronExpression);	
+console.log("Building cronjob using expression: " + cronExpression);
 schedule.scheduleJob(cronExpression, cronCallback);
 
 
