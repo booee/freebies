@@ -45,10 +45,28 @@ var Entry = mongoose.model('Entry');
 
 ///////////////////
 // CONTROLLER
+var version = require('./package').version;
+
 app.get('/', function (req, res) {
+
+		Entry.find().sort({dateDiscovered: -1}).limit(100).exec(function(err, result) {
+			var dataForPage = {};
+			dataForPage.version = version;
+
+			if(!err) {
+				dataForPage.entries = result;
+			} else {
+				console.error('Error while retrieving active entries for feed: ' + err);
+			}
+
+			res.render('index', dataForPage);
+		});
+});
+
+app.get('/forceRefresh', function (req, res) {
 	updateEntries(function() {
-		res.send('all done!');
-	})
+		res.redirect('/');
+	});
 });
 
 app.get('/rss', function (req, res) {
