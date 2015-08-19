@@ -9,7 +9,7 @@ var serverPort = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 var serverIP = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 
 var mongoUrl = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://127.0.0.1:27017/faotw';
-mongoose.connect(mongoUrl);
+// mongoose.connect(mongoUrl);
 
 
 
@@ -94,6 +94,7 @@ app.get('/atom', function (req, res) {
 ///////////////////
 // BIZ LOGIC
 var Crawler = require('./lib/GooglePlayMusicCrawler');
+var apiUrl = 'https://www.kimonolabs.com/api/99kj1dng?apikey=0gHTE2tdYJgLaDC1A0umHPckJyd0qXwu';
 
 function updateEntries(callback) {
 	var crawlCallback = function(newlyParsedEntries) {
@@ -111,7 +112,7 @@ function updateEntries(callback) {
 		callback();
 	}
 
-	new Crawler().getFreeAlbums(crawlCallback);
+	new Crawler(apiUrl).getFreeAlbums(crawlCallback);
 }
 
 function compareToExistingEntries(existingEntries, newlyFoundEntries, callback) {
