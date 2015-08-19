@@ -1,5 +1,13 @@
 <html>
 
+    <head>
+        <style>
+            .expired {
+                display: none;
+            }
+        </style>
+    </head>
+
     <body>
         <div>
             App version: v<%= version %>
@@ -7,14 +15,16 @@
 
         <div>
             <table>
-              <% for(var i = 0; i < entries.length; i++) { %>
-                <% var entry = entries[i]; %>
-                  <tr>
-                    <td>
-                      <%= entry.title %> <% if(entry.status === 0) { %> [EXPIRED] <% } %>
-                    </td>
-                  </tr>
-              <% } %>
+                <% for(var i = 0; i < entries.length; i++) { %>
+                    <% var entry = entries[i]; %>
+                    <tr class="<%= entry.status === 0 ? 'expired' : 'active' %>">
+                        <td>
+                            <a href="<%= entry.url %>">
+                                <%= entry.title %> by <%= entry.by %> <% if(entry.status === 0) { %> [EXPIRED] <% } %>
+                            </a>
+                        </td>
+                    </tr>
+                <% } %>
             </table>
         </div>
     </body>
