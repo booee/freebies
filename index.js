@@ -9,7 +9,7 @@ var serverPort = process.env.OPENSHIFT_NODEJS_PORT || 8080;
 var serverIP = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
 
 var mongoUrl = process.env.OPENSHIFT_MONGODB_DB_URL || 'mongodb://127.0.0.1:27017/faotw';
-// mongoose.connect(mongoUrl);
+mongoose.connect(mongoUrl);
 
 
 
