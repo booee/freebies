@@ -1,6 +1,6 @@
 {
-  "name": "yakshaving-faotw",
-  "version": "0.0.0",
+  "name": "freebies",
+  "version": "0.1.0",
   "description": "Google Play's Free Album of the Week (FAOTW)",
   "main": "index.js",
   "scripts": {
