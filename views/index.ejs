@@ -1,0 +1,22 @@
+<html>
+
+    <body>
+        <div>
+            App version: v<%= version %>
+        </div>
+
+        <div>
+            <table>
+              <% for(var i = 0; i < entries.length; i++) { %>
+                <% var entry = entries[i]; %>
+                  <tr>
+                    <td>
+                      <%= entry.title %> <% if(entry.status === 0) { %> [EXPIRED] <% } %>
+                    </td>
+                  </tr>
+              <% } %>
+            </table>
+        </div>
+    </body>
+
+</html>

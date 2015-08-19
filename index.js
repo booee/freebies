@@ -45,10 +45,28 @@ var Entry = mongoose.model('Entry');
 
 ///////////////////
 // CONTROLLER
+var version = require('./package').version;
+
 app.get('/', function (req, res) {
+
+		Entry.find().sort({dateDiscovered: -1}).limit(100).exec(function(err, result) {
+			var dataForPage = {};
+			dataForPage.version = version;
+
+			if(!err) {
+				dataForPage.entries = result;
+			} else {
+				console.error('Error while retrieving active entries for feed: ' + err);
+			}
+
+			res.render('index', dataForPage);
+		});
+});
+
+app.get('/forceRefresh', function (req, res) {
 	updateEntries(function() {
-		res.send('all done!');
-	})
+		res.redirect('/');
+	});
 });
 
 app.get('/rss', function (req, res) {
@@ -76,6 +94,7 @@ app.get('/atom', function (req, res) {
 ///////////////////
 // BIZ LOGIC
 var Crawler = require('./lib/GooglePlayMusicCrawler');
+var apiUrl = 'https://www.kimonolabs.com/api/99kj1dng?apikey=0gHTE2tdYJgLaDC1A0umHPckJyd0qXwu';
 
 function updateEntries(callback) {
 	var crawlCallback = function(newlyParsedEntries) {
@@ -93,7 +112,7 @@ function updateEntries(callback) {
 		callback();
 	}
 
-	new Crawler().getFreeAlbums(crawlCallback);
+	new Crawler(apiUrl).getFreeAlbums(crawlCallback);
 }
 
 function compareToExistingEntries(existingEntries, newlyFoundEntries, callback) {
